@@ -1,0 +1,316 @@
+```html
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Sabor Criollo Gourmet | Menú Digital QR</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans & Playfair Display -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- QRCode.js para generación dinámica de código QR -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0f0e0d',
+                            card: '#1a1816',
+                            surface: '#24211e',
+                            gold: '#f59e0b',
+                            orange: '#ea580c',
+                            amber: '#d97706'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Estilos personalizados para barra de desplazamiento oculta en categorías */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* Animación sutil de pulso para estado abierto */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            100% { transform: scale(2.2); opacity: 0; }
+        }
+        .pulse-dot::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 9999px;
+            background-color: #22c55e;
+            animation: pulse-ring 1.8s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-brand-dark text-stone-100 font-sans antialiased selection:bg-amber-500 selection:text-stone-950 pb-28">
+
+    <!-- Notificación Toast Flotante -->
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 transform -translate-y-4">
+        <div class="bg-stone-900/95 backdrop-blur-md border border-amber-500/40 text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 text-sm font-medium">
+            <span class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                <i class="fa-solid fa-check text-xs"></i>
+            </span>
+            <span id="toast-message">Producto agregado al pedido</span>
+        </div>
+    </div>
+
+    <!-- 1) ENCABEZADO ELEGANTE -->
+    <header class="relative overflow-hidden bg-gradient-to-b from-stone-900 via-brand-dark to-brand-dark border-b border-stone-800/80">
+        <!-- Decoración de fondo -->
+        <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-amber-500 via-orange-600/20 to-transparent pointer-events-none"></div>
+        
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-8 relative z-10">
+            <!-- Barra superior con acciones rápidas -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+                <!-- Estado del restaurante -->
+                <div id="status-badge" class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-emerald-950/70 border border-emerald-500/30 text-emerald-300 text-xs sm:text-sm font-semibold shadow-sm">
+                    <span class="relative flex h-2.5 w-2.5 pulse-dot">
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    </span>
+                    <span id="status-text">Abierto ahora</span>
+                    <span class="text-emerald-500/60">•</span>
+                    <span class="text-stone-300 font-normal hidden sm:inline">Cierra a las 11:30 PM</span>
+                </div>
+
+                <!-- Botón Código QR -->
+                <button onclick="openQrModal()" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-stone-800/90 hover:bg-stone-700 active:scale-95 border border-amber-500/30 text-amber-400 text-xs sm:text-sm font-semibold transition-all shadow-lg cursor-pointer">
+                    <i class="fa-solid fa-qrcode text-base"></i>
+                    <span>Compartir / QR</span>
+                </button>
+            </div>
+
+            <!-- Identidad del Restaurante -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div class="flex items-start sm:items-center gap-4">
+                    <!-- Logo Ilustrado -->
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-red-600 p-0.5 shadow-xl shadow-orange-600/20 shrink-0">
+                        <div class="w-full h-full bg-stone-950 rounded-[14px] flex flex-col items-center justify-center text-amber-400">
+                            <i class="fa-solid fa-fire-flame-curved text-2xl sm:text-3xl text-orange-500"></i>
+                            <span class="text-[10px] font-extrabold tracking-widest uppercase mt-1 text-amber-300">Gourmet</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-xs uppercase tracking-widest text-amber-500 font-bold">Gastronomía Venezolana</span>
+                            <span class="text-stone-600">•</span>
+                            <span class="text-xs text-amber-300 flex items-center gap-1 font-semibold">
+                                <i class="fa-solid fa-star text-amber-400"></i> 4.9 (320+ reseñas)
+                            </span>
+                        </div>
+                        <h1 class="font-serif text-2xl sm:text-4xl font-bold text-white tracking-tight mt-0.5">
+                            El Sabor Criollo <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Gourmet</span>
+                        </h1>
+                        <p class="text-stone-400 text-xs sm:text-sm mt-1 max-w-xl">
+                            Tequeños artesanales, empanadas crujientes, pastelitos andinos y combos irresistibles preparados al momento.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Tarjeta de Horario e Información -->
+                <div class="bg-brand-card/90 border border-stone-800 rounded-2xl p-3.5 sm:p-4 flex flex-col gap-1.5 text-xs sm:text-sm shrink-0">
+                    <div class="flex items-center gap-2.5 text-stone-300">
+                        <i class="fa-regular fa-clock text-amber-400 w-4 text-center"></i>
+                        <span>Lun - Dom: <strong class="text-white">11:30 AM – 11:30 PM</strong></span>
+                    </div>
+                    <div class="flex items-center gap-2.5 text-stone-300">
+                        <i class="fa-solid fa-location-dot text-orange-500 w-4 text-center"></i>
+                        <span>Av. Principal Las Mercedes, Caracas</span>
+                    </div>
+                    <div class="flex items-center gap-2.5 text-stone-300">
+                        <i class="fa-solid fa-motorcycle text-emerald-400 w-4 text-center"></i>
+                        <span>Delivery activo & Servicio en mesa</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2) BARRA DE NAVEGACIÓN FIJA POR CATEGORÍAS Y BUSCADOR -->
+    <nav class="sticky top-0 z-30 bg-brand-dark/95 backdrop-blur-lg border-b border-stone-800/90 shadow-xl">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 space-y-3">
+            <!-- Buscador -->
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 text-sm"></i>
+                <input 
+                    type="text" 
+                    id="search-input" 
+                    placeholder="Buscar tequeños, empanadas, combos, papelón..." 
+                    class="w-full bg-brand-card border border-stone-700/80 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 rounded-xl pl-11 pr-10 py-2.5 text-sm text-white placeholder-stone-400 outline-none transition-all"
+                >
+                <button id="clear-search" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Pestañas de Categorías -->
+            <div id="category-tabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5">
+                <button data-category="todos" class="category-btn active shrink-0 px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all bg-gradient-to-r from-amber-500 to-orange-600 text-stone-950 shadow-md shadow-orange-600/20">
+                    🍽️ Todo el Menú
+                </button>
+                <button data-category="entradas" class="category-btn shrink-0 px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all bg-brand-card text-stone-300 hover:bg-stone-800 border border-stone-800">
+                    🧀 Entradas
+                </button>
+                <button data-category="platos-fuertes" class="category-btn shrink-0 px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all bg-brand-card text-stone-300 hover:bg-stone-800 border border-stone-800">
+                    🥟 Platos Fuertes
+                </button>
+                <button data-category="combos" class="category-btn shrink-0 px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all bg-brand-card text-stone-300 hover:bg-stone-800 border border-stone-800">
+                    🔥 Combos
+                </button>
+                <button data-category="bebidas" class="category-btn shrink-0 px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all bg-brand-card text-stone-300 hover:bg-stone-800 border border-stone-800">
+                    🥤 Bebidas
+                </button>
+                <button data-category="postres" class="category-btn shrink-0 px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all bg-brand-card text-stone-300 hover:bg-stone-800 border border-stone-800">
+                    🍮 Postres
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 3) CATÁLOGO DE PRODUCTOS -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 pt-6">
+        <!-- Contador de resultados -->
+        <div class="flex items-center justify-between mb-4">
+            <h2 id="current-category-title" class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                <span>Nuestras Especialidades</span>
+            </h2>
+            <span id="items-count" class="text-xs text-stone-400 bg-brand-card px-3 py-1 rounded-full border border-stone-800">
+                16 platos disponibles
+            </span>
+        </div>
+
+        <!-- Contenedor Grid de Tarjetas -->
+        <div id="menu-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            <!-- Las tarjetas se renderizan dinámicamente con JavaScript -->
+        </div>
+
+        <!-- Estado vacío cuando no hay coincidencias de búsqueda -->
+        <div id="empty-state" class="hidden text-center py-16 px-4 bg-brand-card/50 border border-stone-800 rounded-3xl mt-4">
+            <div class="w-16 h-16 rounded-full bg-stone-800 text-amber-400 flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-utensils"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white">No encontramos ese plato</h3>
+            <p class="text-stone-400 text-sm mt-1 max-w-md mx-auto">Intenta buscar con otro término como "tequeños", "pabellón", "pastelito" o explora todas las categorías.</p>
+            <button onclick="clearSearch()" class="mt-5 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-sm transition-colors">
+                Ver todo el menú
+            </button>
+        </div>
+    </main>
+
+    <!-- PIE DE PÁGINA DISCRETO -->
+    <footer class="max-w-5xl mx-auto px-4 sm:px-6 mt-14 pt-6 border-t border-stone-800/80 text-center text-xs text-stone-500">
+        <p>© 2026 El Sabor Criollo Gourmet • Todos los precios están expresados en Dólares Americanos (USD $).</p>
+        <p class="mt-1">Escanea el código QR en tu mesa o comparte este enlace para pedir sin esperas.</p>
+    </footer>
+
+    <!-- 4) BOTÓN FLOTANTE DEL CARRITO DE COMPRAS -->
+    <div id="floating-cart-bar" class="fixed bottom-4 left-0 right-0 z-40 px-4 transition-all duration-300 translate-y-28 opacity-0 pointer-events-none">
+        <div class="max-w-2xl mx-auto">
+            <button onclick="openCartModal()" class="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 active:scale-[0.99] text-stone-950 font-extrabold rounded-2xl p-3.5 sm:p-4 shadow-2xl shadow-orange-600/30 flex items-center justify-between transition-all cursor-pointer border border-amber-300/40">
+                <div class="flex items-center gap-3">
+                    <div class="relative bg-stone-950 text-amber-400 w-10 h-10 rounded-xl flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-bag-shopping text-base"></i>
+                        <span id="cart-badge-count" class="absolute -top-1.5 -right-1.5 bg-white text-stone-950 text-[11px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow">0</span>
+                    </div>
+                    <div class="text-left">
+                        <span class="block text-xs uppercase tracking-wider font-bold text-stone-900/80">Ver mi pedido</span>
+                        <span id="cart-bar-summary" class="text-sm sm:text-base font-extrabold text-stone-950">0 productos seleccionados</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 bg-stone-950/15 px-3.5 py-2 rounded-xl">
+                    <span id="cart-bar-total" class="text-base sm:text-lg font-black">$0.00</span>
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL DEL CARRITO DE COMPRAS Y CHECKOUT WHATSAPP -->
+    <div id="cart-modal" class="fixed inset-0 z-50 hidden">
+        <!-- Backdrop -->
+        <div onclick="closeCartModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"></div>
+        
+        <!-- Panel Modal -->
+        <div class="fixed inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 w-full sm:max-w-xl bg-brand-card border-t sm:border border-stone-700/80 rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden z-10">
+            
+            <!-- Header del Modal -->
+            <div class="px-5 py-4 border-b border-stone-800 flex items-center justify-between bg-stone-900/60">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center">
+                        <i class="fa-solid fa-receipt"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-white leading-tight">Tu Pedido</h3>
+                        <p class="text-xs text-stone-400">Revisa los detalles antes de enviar a cocina</p>
+                    </div>
+                </div>
+                <button onclick="closeCartModal()" class="w-9 h-9 rounded-full bg-stone-800 hover:bg-stone-700 text-stone-300 flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Contenido Scrolleable -->
+            <div class="p-5 overflow-y-auto space-y-6 flex-1">
+                
+                <!-- Lista de Productos en el Carrito -->
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-stone-400">Productos seleccionados</span>
+                        <button onclick="clearCart()" class="text-xs text-red-400 hover:text-red-300 font-medium flex items-center gap-1">
+                            <i class="fa-regular fa-trash-can"></i> Vaciar carrito
+                        </button>
+                    </div>
+                    <div id="cart-items-list" class="space-y-3">
+                        <!-- Items renderizados dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Selector de Modalidad de Entrega -->
+                <div class="bg-stone-900/70 border border-stone-800 rounded-2xl p-4 space-y-4">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-amber-400">
+                        1. ¿Cómo deseas recibir tu pedido?
+                    </label>
+                    
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="setOrderMode('mesa')" id="mode-btn-mesa" class="order-mode-btn flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border-2 border-amber-500 bg-amber-500/15 text-amber-300 font-bold text-xs transition-all">
+                            <i class="fa-solid fa-utensils text-base"></i>
+                            <span>En Mesa</span>
+                        </button>
+                        <button type="button" onclick="setOrderMode('llevar')" id="mode-btn-llevar" class="order-mode-btn flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border border-stone-700 bg-brand-card text-stone-400 hover:text-stone-200 font-semibold text-xs transition-all">
+                            <i class="fa-solid fa-bag-shopping text-base"></i>
+                            <span>Para Llevar</span>
+                        </button>
+                        <button type="button" onclick="setOrderMode('delivery')" id="mode-btn-delivery" class="order-mode-btn flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border border-stone-700 bg-brand-card text-stone-400 hover:text-stone-200 font-semibold text-xs transition-all">
+                            <i class="fa-solid fa-motorcycle text-base"></i>
+                            <span>Delivery</span>
+                        </button>
+                    </div>
+
+                    <!-- Opciones dinámicas según modalidad -->
+                    <!-- Opción Mesa -->
+                    <div id="option-mesa" class="pt-1">
+                        <label for="table-number" class="block text-xs text-stone-300 mb-1.5 font-medium">Selecciona tu número de mesa:</label>
+                        <select id="table-number" class="w-full bg-brand-card border border-stone-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-amber-500 outline-none">
+                            <option value=
